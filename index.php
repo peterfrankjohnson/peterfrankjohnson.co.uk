@@ -1,5 +1,8 @@
 <?php
 
+ini_set('display_errors',  true);
+ini_set('error_reporting', E_ALL);
+
 define('ROBOTS_TXT',       '/robots.txt' );
 define('SITEMAPS_ORG_XML', '/sitemap.xml');
 define('DOMAIN',           'peterfrankjohnson.co.uk');
@@ -29,7 +32,7 @@ function getSessionId() {
   $sessionId = null;
 
   $cookie = getCookie();
-  
+
 }
 
 $requestUri = getRequestUri();
