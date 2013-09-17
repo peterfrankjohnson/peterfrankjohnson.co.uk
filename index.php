@@ -58,7 +58,8 @@ User-agent: *
 Disallow:
 END;
         unset($url);
-    break;
+	exit;
+    	break;
     }
     case SITEMAPS_ORG_XML: {
         $urls = array (
@@ -78,6 +79,7 @@ END;
         print <<<END
 </urlset>
 END;
+	exit;
         break;
     }
 
@@ -94,6 +96,7 @@ END;
     </body>
 </html>
 END;
+	exit;
         break;
     }
 
@@ -110,6 +113,7 @@ END;
     </body>
 </html>
 END;
+	exit;
         break;
     }
 
@@ -126,6 +130,9 @@ END;
     </body>
 </html>
 END;
+	exit;
         break;
     }
 }
+
+require_once('Database.php');
