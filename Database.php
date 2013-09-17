@@ -108,7 +108,7 @@ foreach ($headers as $headerName) {
                 'NULL, ' .
                 $requestId . ', ' .
                 "'" . $headerName . "', " .
-                "'" .  . "'" .
+                "'" . $headerValue . "'" .
             ')'
         );
     }
