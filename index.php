@@ -7,6 +7,8 @@ define('ROBOTS_TXT',       '/robots.txt' );
 define('SITEMAPS_ORG_XML', '/sitemap.xml');
 define('DOMAIN',           'peterfrankjohnson.co.uk');
 define('HOSTNAME',         'www.peterfrankjohnson.co.uk');
+define('GOOGLE_WMT_CODE',  '8a5687b63d43957f');
+define('GOOGLE_WMT_FILE',  'google-site-verification: google' . GOOGLE_WMT_CODE . '.html');
 
 require_once('Database.php');
 
@@ -32,29 +34,34 @@ function getSessionId() {
 $requestUri = Request::Uri();
 
 switch($requestUri) {
+	case GOOGLE_WMT_FILE: {
+		header('Content-Type: text/html');
+		print 'google-site-verification: google' . GOOGLE_WMT_CODE . '.html';
+		break;
+	}
     case ROBOTS_TXT: {
         $url = HOSTNAME . SITEMAPS_ORG_XML;
 
-  	header('Content-Type: text/plain');
-  	print <<<END
+  		header('Content-Type: text/plain');
+  		print <<<END
 Sitemap: http://$url
 
 User-agent: *
 Disallow:
 END;
         unset($url);
-  	break;
+  		break;
     }
 
     case SITEMAPS_ORG_XML: {
-  	$urls = array (
+  		$urls = array (
             'http://' . HOSTNAME . '/',
             'http://' . HOSTNAME . '/test1',
             'http://' . HOSTNAME . '/test2',
             'http://' . HOSTNAME . '/test3'
         );
         header('Content-Type: text/xml');
-  	print <<<END
+  		print <<<END
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 END;
@@ -63,7 +70,7 @@ END;
             print '  <loc>' . $url . '</loc>';
         }
 
-print <<<END
+		print <<<END
 </urlset>
 END;
         break;
