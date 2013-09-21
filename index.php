@@ -8,7 +8,7 @@ define('SITEMAPS_ORG_XML', '/sitemap.xml');
 define('DOMAIN',           'peterfrankjohnson.co.uk');
 define('HOSTNAME',         'www.peterfrankjohnson.co.uk');
 define('GOOGLE_WMT_CODE',  '8a5687b63d43957f');
-define('GOOGLE_WMT_FILE',  'google-site-verification: google' . GOOGLE_WMT_CODE . '.html');
+define('GOOGLE_WMT_FILE',  '/google' . GOOGLE_WMT_CODE . '.html');
 
 require_once('Database.php');
 
@@ -36,7 +36,7 @@ $requestUri = Request::Uri();
 switch($requestUri) {
 	case GOOGLE_WMT_FILE: {
 		header('Content-Type: text/html');
-		print 'google-site-verification: google' . GOOGLE_WMT_CODE . '.html';
+                print 'google-site-verification: google' . GOOGLE_WMT_CODE . '.html';
 		break;
 	}
     case ROBOTS_TXT: {
@@ -60,14 +60,16 @@ END;
             'http://' . HOSTNAME . '/test2',
             'http://' . HOSTNAME . '/test3'
         );
-        header('Content-Type: text/xml');
+        header('Content-Type: text/xml; charset=utf-8');
   		print <<<END
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 END;
 
         foreach($urls as $url) {
-            print '  <loc>' . $url . '</loc>';
+            print '    <url>';
+            print '        <loc>' . $url . '</loc>';
+            print '    </url>';
         }
 
 		print <<<END
@@ -76,68 +78,63 @@ END;
         break;
     }
 
+    case '/': {
+    	header ('Content-Type: text/html; charset=utf-8');
+    	print <<<END
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Peter Frank Johnson's Domain</title>
+		<style type="text/css">
+@media all {
+	body {
+		background-color:#000;
+		border:0;
+		color:#f0f0f0;
+		margin:0;
+		padding:0;
+	}
+
+	pre {
+		font-family:monospace;
+	}
+}
+		</style>
+	</head>
+	<body>
+		<pre>
+
+ peterfrankjohnson.co.uk
+=========================
+
+
+		</pre>
+	</body>
+</html>
+END;
+    }
+
     case '/test1': {
         echo 'TEST 1';
-  	break;
+  		break;
     }
 
     case '/test2': {
         echo 'TEST 2';
-  	break;
+  		break;
     }
 
     case '/test3': {
         echo 'TEST 3';
-  	break;
+  		break;
     }
 
-    case '/': {
-        $results = $database->query('SELECT * FROM request');
-        if($results instanceof SQLite3Result) {
-?>
-<table>
-    <tr>
-        <th>ID</th>
-        <th>Method</th>
-        <th>Uri</th>
-        <th>Query</th>
-        <th>Protocol</th>
-        <th>Time</th>
-        <th>Headers</th>
-    </tr>
-<?php       while ($row = $results->fetchArray()) { ?>
-    <tr>
-        <td><?= $row['id'] ?></td>
-        <td><?= $row['method'] ?></td>
-        <td><?= $row['uri']?></td>
-        <td><?= $row['query']?></td>
-        <td><?= $row['protocol']?></td>
-        <td><?= $row['time']?></td>
-        <td>
-            <table>
-<?php
-                $statement = $database->prepare(
-                    'SELECT * FROM request_header WHERE request_id=:id'
-                );
-                $statement->bindValue(':id', $row['id']);
-                $result = $statement->execute();
-                while ($row = $result->fetchArray()) {
-?>
-                <tr>
-                    <td>
-                        <pre><?= $row['name'] . ":" . $row['header'] ?></pre>
-                    </td>
-                </tr>
-<?php           } ?>
-            </table>
-        </td>
-    </tr>
-<?php       } ?>
-</table>
-<?php
-        } 
-    break;
+    case '/admin/requests': {
+    	require_once('www/admin/requests.php');
+    	break;
     }
+
     default: {
         header('HTTP/1.0 404 Not Found');
         break;

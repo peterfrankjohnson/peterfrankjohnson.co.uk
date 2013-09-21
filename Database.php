@@ -1,5 +1,23 @@
 <?php
 
+class Client {
+    public static function IP() {
+// X-Forwarded-For can be faked.
+// How do we test this? Traceroute?
+// 
+// Can we test anything in real-time?
+//
+// http://stackoverflow.com/questions/3003145/how-to-get-client-ip-address-in-php
+        if(isset($_SERVER['X_FORWARDED_FOR'])) {
+            return $_SERVER['X_FORWARDED_FOR'];
+        }
+        if(isset($_SERVER['REMOTE_ADDR'])) {
+            return $_SERVER['REMOTE_ADDR'];
+        }
+        return null;
+    }
+}
+
 class Database extends SQLite3
 {
     function __construct()
@@ -54,16 +72,35 @@ class Request {
     }
 }
 
+class Response {
+}
+
 $database = new Database();
+
+$database->exec(
+    'CREATE TABLE IF NOT EXISTS client (
+        id INTEGER PRIMARY KEY,
+        ip_address STRING
+    )'
+);
 
 $database->exec(
     'CREATE TABLE IF NOT EXISTS request (
         id INTEGER PRIMARY KEY,
+        client_id INTEGER,
         method STRING,
         uri STRING,
         query STRING,
         protocol STRING,
         time INTEGER
+    )'
+);
+
+$database->exec(
+    'CREATE TABLE IF NOT EXISTS request_has_request_header (
+        id INTEGER PRIMARY KEY,
+        request_id INTEGER,
+        request_header_id INTEGER
     )'
 );
 
@@ -75,9 +112,30 @@ $database->exec(
         header STRING
     )'
 );
+
+$statement = $database->prepare(
+    'SELECT * FROM client WHERE ip_address = :ip_address'
+);
+$statement->bindValue(':ip_address', Client::IP());
+$result = $statement->execute();
+if($result) {
+    $row = $result->fetchArray();
+    $client_id = $row['id'];
+}
+if ($client_id == '') {
+    $database->exec(
+        'INSERT INTO client VALUES(
+            NULL, ' .
+            "'" . Client::IP() . "'" .  
+        ')'
+    );
+    $client_id = $database->lastInsertRowId();
+}
+
 $database->exec(
     'INSERT INTO request VALUES(
         NULL, ' .
+        $client_id . ', ' .
         "'" . Request::Method() . "', " .
         "'" . Request::Uri() . "', " .
         "'" . Request::QueryString() . "', " .
