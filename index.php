@@ -10,7 +10,7 @@ define('HOSTNAME',         'www.peterfrankjohnson.co.uk');
 define('GOOGLE_WMT_CODE',  '8a5687b63d43957f');
 define('GOOGLE_WMT_FILE',  '/google' . GOOGLE_WMT_CODE . '.html');
 
-$hosts = array ( 'www.peterfrankjohnson.co.uk', 'peterfrankjohnson.co.uk', '127.0.0.1' )
+$hosts = array ( 'www.peterfrankjohnson.co.uk', 'peterfrankjohnson.co.uk', '127.0.0.1' );
 
 require_once('Database.php');
 
@@ -51,7 +51,7 @@ if ((substr($requestUri, 0, strlen('http://')) == 'http://') OR (substr($request
 //}
 
 // Check Method
-// if () {
+// if ( ! method_allowed ( Request::URI, Request::Method ) ) {
 //	http_response_code(405);
 // }
 
