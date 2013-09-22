@@ -8,9 +8,23 @@ class Client {
 // Can we test anything in real-time?
 //
 // http://stackoverflow.com/questions/3003145/how-to-get-client-ip-address-in-php
+        if($ip == Client::XForwardedFor()) {
+            return $ip;
+        }
+        if($ip == Client::RemoteAddr()) {
+            return $ip;
+        }
+        return null;
+    }
+
+    public static function XForwardedFor() {
         if(isset($_SERVER['X_FORWARDED_FOR'])) {
             return $_SERVER['X_FORWARDED_FOR'];
         }
+        return null;
+    }
+
+    public static function RemoteAddr() {
         if(isset($_SERVER['REMOTE_ADDR'])) {
             return $_SERVER['REMOTE_ADDR'];
         }
@@ -80,7 +94,9 @@ $database = new Database();
 $database->exec(
     'CREATE TABLE IF NOT EXISTS client (
         id INTEGER PRIMARY KEY,
-        ip_address STRING
+        ip_address STRING,
+        x_forwarded_for STRING,
+        remote_addr STRING
     )'
 );
 
@@ -127,6 +143,8 @@ if ($client_id == '') {
         'INSERT INTO client VALUES(
             NULL, ' .
             "'" . Client::IP() . "'" .  
+            "'" . Client::XForwardedFor() . "'" .  
+            "'" . Client::RemoteAddr() . "'" .  
         ')'
     );
     $client_id = $database->lastInsertRowId();
@@ -161,13 +179,25 @@ $headers = array(
 foreach ($headers as $headerName) {
     $headerValue = Request::Header($headerName);
     if($headerValue != "") {
-        $database->exec(
-            'INSERT INTO request_header VALUES( ' .
-                'NULL, ' .
-                $requestId . ', ' .
-                "'" . $headerName . "', " .
-                "'" . $headerValue . "'" .
-            ')'
+        $statement = $database->prepare(
+            'SELECT * FROM request_header WHERE name = ":name" and value = ":value"'
         );
+        $statement->bindValue(':name', $headerName);
+        $statement->bindValue(':value', $headerValue);
+        $result = $statement->execute();
+        if($result) {
+            $row = $result->fetchArray();
+            $header_id = $row['id'];
+        }
+        if ($header_id == '') {
+            $database->exec(
+                'INSERT INTO request_header VALUES( ' .
+                    'NULL, ' .
+                    $requestId . ', ' .
+                    "'" . $headerName . "', " .
+                    "'" . $headerValue . "'" .
+                ')'
+            );
+        }
     }
 }
