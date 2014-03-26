@@ -1,0 +1,8 @@
+User-agent: *
+Disallow:
+
+# Stop aboutus.org from scraping content
+User-agent: AboutUsBot 
+Disallow: /
+
+Sitemap: http://www.peterfrankjohnson.co.uk/sitemap.xml
